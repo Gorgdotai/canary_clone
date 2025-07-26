@@ -38,7 +38,7 @@
     <div class="sound-control">
         <button class="sound-btn" id="soundToggle">🔊</button>
         <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.01" value="0.3">
-    </div>
+      </div>
 
     <!-- Leaderboard -->
     <div class="leaderboard">
@@ -64,6 +64,7 @@
         <button id="bgUpgrade">Matrix Color (Cost: <span id="bgCost">300</span>)</button>
         <button id="goldenDonut">Golden Donut (Cost: <span id="goldCost">500</span>)</button>
         <button id="prestige">Prestige Mode</button>
+        <button id="prestige">Prestige (Unlock at <span id="prestigeGoal">1000</span>)</button>
     </div>
 
     <script>
@@ -106,9 +107,12 @@
         let bgCost = parseInt(localStorage.getItem('bgCost')) || 300;
         let goldCost = parseInt(localStorage.getItem('goldCost')) || 500;
         let prestigeMultiplier = parseInt(localStorage.getItem('prestigeMultiplier')) || 1;
+        let prestigeGoal = parseInt(localStorage.getItem('prestigeGoal')) || 1000;
         let goldenActive = false;
         let donutColor = localStorage.getItem('donutColor') || '#00ff00';
         let matrixColor = '#0f0';
+
+        const colorOptions = ['#00ff00', '#ff00ff', '#00ffff', '#ff0000', '#ffff00', '#ff8800', '#ffffff', '#ff0080', '#00ff80', '#8800ff'];
 
         function updateUI() {
             counterEl.textContent = count;
@@ -120,6 +124,7 @@
             document.getElementById("colorCost").textContent = Math.floor(colorCost);
             document.getElementById("bgCost").textContent = Math.floor(bgCost);
             document.getElementById("goldCost").textContent = Math.floor(goldCost);
+            document.getElementById("prestigeGoal").textContent = prestigeGoal;
             donut.style.color = donutColor;
         }
 
@@ -135,6 +140,7 @@
             localStorage.setItem('bgCost', bgCost);
             localStorage.setItem('goldCost', goldCost);
             localStorage.setItem('prestigeMultiplier', prestigeMultiplier);
+            localStorage.setItem('prestigeGoal', prestigeGoal);
             localStorage.setItem('donutColor', donutColor);
         }
 
@@ -187,6 +193,8 @@
         document.getElementById("clickUpgrade").onclick = () => { if (count >= clickCost) { count -= clickCost; clickPower++; clickCost *= 2; updateUI(); saveState(); playSound(upgradeSound);} };
         document.getElementById("colorUpgrade").onclick = () => { if (count >= colorCost) { count -= colorCost; colorCost *= 1.8; donutColor = donutColor === '#00ff00' ? '#ff00ff' : '#00ffff'; updateUI(); saveState(); playSound(upgradeSound);} };
         document.getElementById("bgUpgrade").onclick = () => { if (count >= bgCost) { count -= bgCost; bgCost *= 1.8; matrixColor = matrixColor === '#0f0' ? '#ff0000' : '#00ffff'; updateUI(); saveState(); playSound(upgradeSound);} };
+        document.getElementById("colorUpgrade").onclick = () => { if (count >= colorCost) { count -= colorCost; colorCost *= 1.8; donutColor = colorOptions[Math.floor(Math.random() * colorOptions.length)]; updateUI(); saveState(); playSound(upgradeSound);} };
+        document.getElementById("bgUpgrade").onclick = () => { if (count >= bgCost) { count -= bgCost; bgCost *= 1.8; matrixColor = colorOptions[Math.floor(Math.random() * colorOptions.length)]; updateUI(); saveState(); playSound(upgradeSound);} };
 
         document.getElementById("goldenDonut").onclick = () => {
             if (count >= goldCost && !goldenActive) {
@@ -208,9 +216,26 @@
                 prestigeMultiplier *= 2; count = 0; autoClickers = 0; clickPower = 1;
                 speed = 50; speedCost = 50; autoCost = 100; clickCost = 150;
                 colorCost = 200; bgCost = 300; goldCost = 500;
+            if (count >= prestigeGoal) {
+                prestigeMultiplier *= 2;
+                prestigeGoal *= 100;
+                count = 0;
+                autoClickers = 0;
+                clickPower = 1;
+                speed = 50;
+                speedCost = 50;
+                autoCost = 100;
+                clickCost = 150;
+                colorCost = 200;
+                bgCost = 300;
+                goldCost = 500;
                 document.body.classList.add('prestige-bg');
                 playSound(prestigeSound);
                 saveState(); updateUI();
+                saveState();
+                updateUI();
+            } else {
+                alert(`You need ${prestigeGoal} donuts to Prestige!`);
             }
         };
 
