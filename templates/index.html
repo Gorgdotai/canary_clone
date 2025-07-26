@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Canary Clone</title>
+    <title>Donut Clicker 2.0</title>
     <style>
         html, body {
             margin: 0;
@@ -13,7 +13,7 @@
             font-family: monospace;
         }
 
-        /* Matrix Rain Canvas */
+        /* Matrix Background */
         #matrixCanvas {
             position: fixed;
             top: 0;
@@ -21,10 +21,9 @@
             width: 100%;
             height: 100%;
             z-index: 1;
-            background: black;
         }
 
-        /* Heading */
+        /* Title */
         h1 {
             position: absolute;
             top: 20px;
@@ -32,17 +31,17 @@
             text-align: center;
             font-size: 3em;
             color: #00ff00;
-            text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00;
+            text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
             animation: neonPulse 2s infinite;
             z-index: 2;
         }
 
         @keyframes neonPulse {
             0%, 100% {
-                text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00;
+                text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
             }
             50% {
-                text-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00, 0 0 60px #00ff00;
+                text-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00;
             }
         }
 
@@ -55,26 +54,34 @@
             font-size: 14px;
             line-height: 12px;
             z-index: 3;
+            cursor: pointer;
+            user-select: none;
+            color: #00ff00;
         }
 
-        /* Counter and Button */
+        /* Counter */
         .counter-container {
             position: absolute;
-            bottom: 80px;
+            bottom: 130px;
             width: 100%;
             text-align: center;
             z-index: 4;
-        }
-
-        .counter-container h2 {
-            color: #00ff00;
             font-size: 24px;
-            margin-bottom: 10px;
         }
 
-        #incrementBtn {
-            padding: 12px 24px;
+        /* Upgrades Panel */
+        .shop {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            z-index: 5;
+        }
+
+        .shop button {
+            padding: 10px 20px;
             font-size: 18px;
+            margin: 10px;
             background: #00ff00;
             color: black;
             border: none;
@@ -84,28 +91,34 @@
             transition: transform 0.2s;
         }
 
-        #incrementBtn:hover {
+        .shop button:hover {
             transform: scale(1.1);
         }
     </style>
 </head>
 <body>
     <canvas id="matrixCanvas"></canvas>
-    <h1>WELCOME TO CANARY CLONE</h1>
-    <pre id="donut"></pre>
+    <h1>🍩 DONUT CLICKER 2.0 🍩</h1>
+    <pre id="donut" title="Click the donut!"></pre>
 
     <div class="counter-container">
-        <h2>Counter: <span id="counter">0</span></h2>
-        <button id="incrementBtn">Click Me!</button>
+        Score: <span id="counter">0</span>
+    </div>
+
+    <div class="shop">
+        <button id="speedUpgrade">Upgrade Speed (Cost: 50)</button>
+        <button id="colorUpgrade">Upgrade Color (Cost: 100)</button>
+        <button id="bgUpgrade">Upgrade Background (Cost: 200)</button>
     </div>
 
     <script>
-        // ✅ Matrix Rain Effect
+        // ✅ Matrix Background
         const canvas = document.getElementById('matrixCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
+        let matrixColor = '#0f0';
         const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
         const fontSize = 14;
         const columns = canvas.width / fontSize;
@@ -114,7 +127,7 @@
         function drawMatrix() {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#0f0';
+            ctx.fillStyle = matrixColor;
             ctx.font = fontSize + 'px monospace';
 
             for (let i = 0; i < drops.length; i++) {
@@ -129,9 +142,10 @@
         }
         setInterval(drawMatrix, 33);
 
-        // ✅ Spinning ASCII Donut
+        // ✅ Spinning Donut
         const donut = document.getElementById("donut");
-        let A = 0, B = 0;
+        let A = 0, B = 0, speed = 50;
+        let donutColor = '#00ff00';
 
         setInterval(() => {
             let b = [];
@@ -164,16 +178,63 @@
                     }
                 }
             }
+            donut.style.color = donutColor;
             donut.textContent = b.join("");
             A += 0.04;
             B += 0.08;
-        }, 50);
+        }, speed);
 
-        // ✅ Button Counter Logic
-        let count = 0;
-        document.getElementById("incrementBtn").addEventListener("click", () => {
+        // ✅ Donut Clicker Logic
+        let count = parseInt(localStorage.getItem('score')) || 0;
+        const counterEl = document.getElementById("counter");
+        counterEl.textContent = count;
+
+        donut.addEventListener("click", () => {
             count++;
-            document.getElementById("counter").textContent = count;
+            counterEl.textContent = count;
+            localStorage.setItem('score', count);
+        });
+
+        // ✅ Upgrade Logic
+        const speedBtn = document.getElementById("speedUpgrade");
+        const colorBtn = document.getElementById("colorUpgrade");
+        const bgBtn = document.getElementById("bgUpgrade");
+
+        speedBtn.addEventListener("click", () => {
+            if (count >= 50) {
+                count -= 50;
+                counterEl.textContent = count;
+                localStorage.setItem('score', count);
+                speed = Math.max(10, speed - 10);
+                clearInterval(); // restart donut rotation with new speed
+                alert("Speed upgraded! Donut spins faster.");
+            } else {
+                alert("Not enough points!");
+            }
+        });
+
+        colorBtn.addEventListener("click", () => {
+            if (count >= 100) {
+                count -= 100;
+                counterEl.textContent = count;
+                localStorage.setItem('score', count);
+                donutColor = '#ff00ff'; // Magenta color
+                alert("Donut color changed!");
+            } else {
+                alert("Not enough points!");
+            }
+        });
+
+        bgBtn.addEventListener("click", () => {
+            if (count >= 200) {
+                count -= 200;
+                counterEl.textContent = count;
+                localStorage.setItem('score', count);
+                matrixColor = '#ff0000'; // Red background text
+                alert("Background changed!");
+            } else {
+                alert("Not enough points!");
+            }
         });
     </script>
 </body>
