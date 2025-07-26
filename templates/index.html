@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Donut Clicker 4.1</title>
+    <title>Gurk's Doughnut Clicker</title>
     <style>
         html, body {
             margin: 0;
@@ -35,12 +35,8 @@
         }
 
         @keyframes neonPulse {
-            0%, 100% {
-                text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
-            }
-            50% {
-                text-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00;
-            }
+            0%, 100% { text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00; }
+            50% { text-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00; }
         }
 
         pre {
@@ -58,7 +54,7 @@
 
         .counter-container {
             position: absolute;
-            bottom: 250px;
+            bottom: 270px;
             width: 100%;
             text-align: center;
             z-index: 4;
@@ -86,9 +82,7 @@
             transition: transform 0.2s;
         }
 
-        .shop button:hover {
-            transform: scale(1.1);
-        }
+        .shop button:hover { transform: scale(1.1); }
 
         .status {
             margin-top: 10px;
@@ -128,14 +122,9 @@
             cursor: pointer;
         }
 
-        .volume-slider {
-            width: 100px;
-            display: none;
-        }
+        .volume-slider { width: 100px; display: none; }
 
-        .sound-control:hover .volume-slider {
-            display: block;
-        }
+        .sound-control:hover .volume-slider { display: block; }
 
         /* Leaderboard */
         .leaderboard {
@@ -147,26 +136,42 @@
             border: 1px solid #00ff00;
             border-radius: 8px;
             z-index: 7;
-            width: 200px;
+            width: 220px;
             color: #00ff00;
         }
 
-        .leaderboard h3 {
-            margin: 0;
-            font-size: 18px;
-            text-align: center;
-            margin-bottom: 10px;
+        .leaderboard h3 { margin: 0; font-size: 18px; text-align: center; margin-bottom: 10px; }
+
+        .leaderboard input { width: 100%; margin-top: 8px; padding: 5px; }
+
+        .leaderboard button {
+            margin-top: 6px;
+            width: 100%;
+            padding: 8px;
+            background: #00ff00;
+            color: black;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
         }
 
-        .leaderboard p {
-            text-align: center;
-            font-size: 14px;
+        /* Prestige Background Animation */
+        body.prestige-bg {
+            background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00);
+            background-size: 600% 600%;
+            animation: gradientShift 8s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
     </style>
 </head>
 <body>
     <canvas id="matrixCanvas"></canvas>
-    <h1>🍩 DONUT CLICKER 4.1 🍩</h1>
+    <h1>🍩 Gurk's Doughnut Clicker 🍩</h1>
     <pre id="donut" title="Click the donut!"></pre>
 
     <div class="sound-control">
@@ -176,7 +181,9 @@
 
     <div class="leaderboard">
         <h3>Leaderboard</h3>
-        <p>Coming Soon!</p>
+        <ul id="leaderboardList" style="list-style:none; padding:0; margin:0;"></ul>
+        <input type="text" id="username" placeholder="Your Name">
+        <button id="submitScore">Submit Score</button>
     </div>
 
     <div class="counter-container">
@@ -190,164 +197,103 @@
         <button id="speedUpgrade">Speed Upgrade (Cost: <span id="speedCost">50</span>)</button>
         <button id="autoClicker">Buy Auto-Clicker (Cost: <span id="autoCost">100</span>)</button>
         <button id="clickUpgrade">Click Power Upgrade (Cost: <span id="clickCost">150</span>)</button>
-        <button id="colorUpgrade">Color Upgrade (Cost: <span id="colorCost">200</span>)</button>
-        <button id="bgUpgrade">Background Upgrade (Cost: <span id="bgCost">300</span>)</button>
+        <button id="goldenDonut">Golden Donut (Cost: <span id="goldCost">500</span>)</button>
+        <button id="prestige">Prestige Mode</button>
     </div>
 
     <script>
-        // ✅ Matrix Background
+        // Matrix Background
         const canvas = document.getElementById('matrixCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-
         let matrixColor = '#0f0';
         const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
         const fontSize = 14;
         const columns = canvas.width / fontSize;
         const drops = Array(Math.floor(columns)).fill(1);
-
         function drawMatrix() {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = matrixColor;
             ctx.font = fontSize + 'px monospace';
-
             for (let i = 0; i < drops.length; i++) {
                 const text = letters.charAt(Math.floor(Math.random() * letters.length));
                 ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                    drops[i] = 0;
-                }
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
                 drops[i]++;
             }
         }
         setInterval(drawMatrix, 33);
 
-        // ✅ Sounds
+        // Sounds
         const clickSound = new Audio('/static/sounds/click.mp3');
         const upgradeSound = new Audio('/static/sounds/upgrade.mp3');
         const bgMusic = new Audio('/static/sounds/music.mp3');
-        bgMusic.loop = true;
-        bgMusic.volume = 0.3;
-
-        document.body.addEventListener('click', () => {
-            if (bgMusic.paused) bgMusic.play();
-        }, { once: true });
-
+        bgMusic.loop = true; bgMusic.volume = 0.3;
+        document.body.addEventListener('click', () => { if (bgMusic.paused) bgMusic.play(); }, { once: true });
         let soundEnabled = true;
-
-        // ✅ Sound toggle
         document.getElementById('soundToggle').addEventListener('click', () => {
             soundEnabled = !soundEnabled;
             document.getElementById('soundToggle').textContent = soundEnabled ? '🔊' : '🔇';
-            if (!soundEnabled) {
-                bgMusic.pause();
-            } else {
-                bgMusic.play();
-            }
+            if (!soundEnabled) bgMusic.pause(); else bgMusic.play();
         });
+        document.getElementById('volumeSlider').addEventListener('input', e => { bgMusic.volume = e.target.value; });
 
-        // ✅ Volume control
-        document.getElementById('volumeSlider').addEventListener('input', (e) => {
-            bgMusic.volume = e.target.value;
-        });
-
-        // ✅ Game Variables
+        // Game Variables
         const donut = document.getElementById("donut");
         const counterEl = document.getElementById("counter");
         const speedCostEl = document.getElementById("speedCost");
         const autoCostEl = document.getElementById("autoCost");
         const clickCostEl = document.getElementById("clickCost");
-        const colorCostEl = document.getElementById("colorCost");
-        const bgCostEl = document.getElementById("bgCost");
         const autoCountEl = document.getElementById("autoCount");
         const clickPowerEl = document.getElementById("clickPower");
-
         let count = parseInt(localStorage.getItem('score')) || 0;
         let speed = parseInt(localStorage.getItem('speed')) || 50;
-        let donutColor = localStorage.getItem('donutColor') || '#00ff00';
         let speedCost = parseInt(localStorage.getItem('speedCost')) || 50;
         let autoClickers = parseInt(localStorage.getItem('autoClickers')) || 0;
         let clickPower = parseInt(localStorage.getItem('clickPower')) || 1;
         let autoCost = parseInt(localStorage.getItem('autoCost')) || 100;
         let clickCost = parseInt(localStorage.getItem('clickCost')) || 150;
-        let colorCost = parseInt(localStorage.getItem('colorCost')) || 200;
-        let bgCost = parseInt(localStorage.getItem('bgCost')) || 300;
-
+        let goldCost = parseInt(localStorage.getItem('goldCost')) || 500;
+        let prestigeMultiplier = parseInt(localStorage.getItem('prestigeMultiplier')) || 1;
+        let prestigeActive = localStorage.getItem('prestigeActive') || false;
+        let goldenActive = false;
         counterEl.textContent = count;
         speedCostEl.textContent = speedCost;
         autoCostEl.textContent = autoCost;
         clickCostEl.textContent = clickCost;
-        colorCostEl.textContent = colorCost;
-        bgCostEl.textContent = bgCost;
         autoCountEl.textContent = autoClickers;
         clickPowerEl.textContent = clickPower;
 
-        // ✅ Donut Rotation
         let A = 0, B = 0;
         let rotationInterval = setInterval(rotateDonut, speed);
-
         function rotateDonut() {
-            let b = [];
-            let z = [];
-            const width = 176, height = 44;
-            for (let k = 0; k < width * height; k++) {
-                b[k] = k % width === width - 1 ? "\n" : " ";
-                z[k] = 0;
+            let b = [], z = [], width = 176, height = 44;
+            for (let k = 0; k < width * height; k++) { b[k] = k % width === width - 1 ? "\n" : " "; z[k] = 0; }
+            for (let j = 0; j < 6.28; j += 0.07) for (let i = 0; i < 6.28; i += 0.02) {
+                const c = Math.sin(i), d = Math.cos(j), e = Math.sin(A), f = Math.sin(j), g = Math.cos(A), h = d + 2,
+                      D = 1 / (c * h * e + f * g + 5), l = Math.cos(i), m = Math.cos(B), n = Math.sin(B), t = c * h * g - f * e;
+                const x = 0 | (width / 2 + 30 * D * (l * h * m - t * n)), y = 0 | (height / 2 + 15 * D * (l * h * n + t * m)), o = x + width * y,
+                      N = 0 | (8 * ((f * e - c * d * g) * m - c * d * e - f * g - l * d * n));
+                if (height > y && y > 0 && x > 0 && width > x && D > z[o]) { z[o] = D; b[o] = ".,-~:;=!*#$@"[N > 0 ? N : 0]; }
             }
-            for (let j = 0; j < 6.28; j += 0.07) {
-                for (let i = 0; i < 6.28; i += 0.02) {
-                    const c = Math.sin(i),
-                          d = Math.cos(j),
-                          e = Math.sin(A),
-                          f = Math.sin(j),
-                          g = Math.cos(A),
-                          h = d + 2,
-                          D = 1 / (c * h * e + f * g + 5),
-                          l = Math.cos(i),
-                          m = Math.cos(B),
-                          n = Math.sin(B),
-                          t = c * h * g - f * e;
-                    const x = 0 | (width / 2 + 30 * D * (l * h * m - t * n)),
-                          y = 0 | (height / 2 + 15 * D * (l * h * n + t * m)),
-                          o = x + width * y,
-                          N = 0 | (8 * ((f * e - c * d * g) * m - c * d * e - f * g - l * d * n));
-                    if (height > y && y > 0 && x > 0 && width > x && D > z[o]) {
-                        z[o] = D;
-                        b[o] = ".,-~:;=!*#$@"[N > 0 ? N : 0];
-                    }
-                }
-            }
-            donut.style.color = donutColor;
-            donut.textContent = b.join("");
-            A += 0.04;
-            B += 0.08;
+            donut.textContent = b.join(""); A += 0.04; B += 0.08;
         }
 
-        // ✅ Click Logic
         donut.addEventListener("click", () => {
-            count += clickPower;
+            count += clickPower * prestigeMultiplier * (goldenActive ? 10 : 1);
             counterEl.textContent = count;
             localStorage.setItem('score', count);
-            if (soundEnabled) {
-                clickSound.currentTime = 0;
-                clickSound.play();
-            }
+            if (soundEnabled) { clickSound.currentTime = 0; clickSound.play(); }
         });
 
-        // ✅ Auto-clicker Interval
         setInterval(() => {
             if (autoClickers > 0) {
-                count += autoClickers;
+                count += autoClickers * prestigeMultiplier;
                 counterEl.textContent = count;
                 localStorage.setItem('score', count);
-
-                // Visual donuts falling
-                for (let i = 0; i < autoClickers; i++) {
-                    createFallingDonut();
-                }
+                for (let i = 0; i < autoClickers; i++) createFallingDonut();
             }
         }, 1000);
 
@@ -360,80 +306,54 @@
             setTimeout(() => donutEl.remove(), 3000);
         }
 
-        // ✅ Upgrade Buttons
-        document.getElementById("speedUpgrade").addEventListener("click", () => {
-            if (count >= speedCost) {
-                count -= speedCost;
-                speedCost = Math.floor(speedCost * 1.8);
-                speed = Math.max(10, speed - 10);
-                clearInterval(rotationInterval);
-                rotationInterval = setInterval(rotateDonut, speed);
-                if (soundEnabled) upgradeSound.play();
-                updateDisplay();
-            }
-        });
-
-        document.getElementById("autoClicker").addEventListener("click", () => {
-            if (count >= autoCost) {
-                count -= autoCost;
-                autoClickers++;
-                autoCost = Math.floor(autoCost * 1.8);
-                if (soundEnabled) upgradeSound.play();
-                updateDisplay();
-            }
-        });
-
-        document.getElementById("clickUpgrade").addEventListener("click", () => {
-            if (count >= clickCost) {
-                count -= clickCost;
-                clickPower++;
-                clickCost = Math.floor(clickCost * 2);
-                if (soundEnabled) upgradeSound.play();
-                updateDisplay();
-            }
-        });
-
-        document.getElementById("colorUpgrade").addEventListener("click", () => {
-            if (count >= colorCost) {
-                count -= colorCost;
-                colorCost = Math.floor(colorCost * 1.8);
-                donutColor = donutColor === '#00ff00' ? '#ff00ff' : '#00ffff';
-                if (soundEnabled) upgradeSound.play();
-                updateDisplay();
-            }
-        });
-
-        document.getElementById("bgUpgrade").addEventListener("click", () => {
-            if (count >= bgCost) {
-                count -= bgCost;
-                bgCost = Math.floor(bgCost * 1.8);
-                matrixColor = matrixColor === '#0f0' ? '#ff0000' : '#00ffff';
-                if (soundEnabled) upgradeSound.play();
-                updateDisplay();
-            }
-        });
+        // Upgrades
+        document.getElementById("speedUpgrade").addEventListener("click", () => { if (count >= speedCost) { count -= speedCost; speedCost *= 1.8; speed = Math.max(10, speed - 10); clearInterval(rotationInterval); rotationInterval = setInterval(rotateDonut, speed); if (soundEnabled) upgradeSound.play(); updateDisplay(); } });
+        document.getElementById("autoClicker").addEventListener("click", () => { if (count >= autoCost) { count -= autoCost; autoClickers++; autoCost *= 1.8; if (soundEnabled) upgradeSound.play(); updateDisplay(); } });
+        document.getElementById("clickUpgrade").addEventListener("click", () => { if (count >= clickCost) { count -= clickCost; clickPower++; clickCost *= 2; if (soundEnabled) upgradeSound.play(); updateDisplay(); } });
+        document.getElementById("goldenDonut").addEventListener("click", () => { if (count >= goldCost && !goldenActive) { count -= goldCost; if (soundEnabled) upgradeSound.play(); goldenActive = true; setTimeout(() => goldenActive = false, 30000); updateDisplay(); } });
+        document.getElementById("prestige").addEventListener("click", () => { if (confirm("Prestige? Reset score for permanent x2 multiplier!")) { prestigeMultiplier *= 2; localStorage.setItem('prestigeMultiplier', prestigeMultiplier); localStorage.clear(); count = 0; autoClickers = 0; clickPower = 1; speed = 50; document.body.classList.add('prestige-bg'); updateDisplay(); } });
 
         function updateDisplay() {
             counterEl.textContent = count;
-            speedCostEl.textContent = speedCost;
-            autoCostEl.textContent = autoCost;
-            clickCostEl.textContent = clickCost;
-            colorCostEl.textContent = colorCost;
-            bgCostEl.textContent = bgCost;
+            speedCostEl.textContent = Math.floor(speedCost);
+            autoCostEl.textContent = Math.floor(autoCost);
+            clickCostEl.textContent = Math.floor(clickCost);
             autoCountEl.textContent = autoClickers;
             clickPowerEl.textContent = clickPower;
-
             localStorage.setItem('score', count);
             localStorage.setItem('speed', speed);
-            localStorage.setItem('donutColor', donutColor);
             localStorage.setItem('speedCost', speedCost);
             localStorage.setItem('autoClickers', autoClickers);
             localStorage.setItem('clickPower', clickPower);
             localStorage.setItem('autoCost', autoCost);
             localStorage.setItem('clickCost', clickCost);
-            localStorage.setItem('colorCost', colorCost);
-            localStorage.setItem('bgCost', bgCost);
+            localStorage.setItem('goldCost', goldCost);
         }
+
+        // Leaderboard Functions
+        async function loadLeaderboard() {
+            const res = await fetch('/leaderboard');
+            const data = await res.json();
+            const list = document.getElementById('leaderboardList');
+            list.innerHTML = "";
+            data.forEach(row => {
+                const li = document.createElement('li');
+                li.textContent = `${row.username}: ${row.score}`;
+                list.appendChild(li);
+            });
+        }
+
+        document.getElementById('submitScore').addEventListener('click', async () => {
+            const username = document.getElementById('username').value || "Guest";
+            await fetch('/leaderboard', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, score: count })
+            });
+            loadLeaderboard();
+        });
+
+        loadLeaderboard();
     </script>
 </body>
 </html>
