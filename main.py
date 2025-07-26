@@ -5,24 +5,33 @@ from typing import List, Optional
 from fastapi import FastAPI, Depends, Request, Query, status
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
 # Import your DB logic and schemas
 from database import SessionLocal, init_db, Measurement
 from schemas import MeasurementCreate, MeasurementRead
 
-# Initialize app and template engine
-app = FastAPI(title="Canary Clone API", description="A minimal open‑source replacement for the Canary data collector.")
+# ✅ Initialize app
+app = FastAPI(
+    title="Canary Clone API",
+    description="A minimal open‑source replacement for the Canary data collector."
+)
+
+# ✅ Mount static files (for sounds, images, etc.)
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# ✅ Templates for rendering HTML
 templates = Jinja2Templates(directory="templates")
 
 
-# ✅ Homepage route (serves HTML)
+# ✅ Homepage route (serves Donut Clicker UI)
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-# ✅ Startup event to init DB
+# ✅ Startup event to initialize DB
 @app.on_event("startup")
 def startup():
     init_db()
@@ -37,7 +46,7 @@ def get_db():
         db.close()
 
 
-# ✅ API endpoints
+# ✅ API Endpoints
 @app.post("/measurements", response_model=MeasurementRead, status_code=status.HTTP_201_CREATED)
 def create_measurement(measurement: MeasurementCreate, db: Session = Depends(get_db)) -> MeasurementRead:
     record = Measurement(sensor_id=measurement.sensor_id, ts=measurement.ts, value=measurement.value)
@@ -69,7 +78,7 @@ def list_sensors(db: Session = Depends(get_db)) -> List[str]:
     return [row[0] for row in results]
 
 
-# ✅ Run the app
+# ✅ Run locally
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
