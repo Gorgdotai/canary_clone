@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Canary Clone</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background: black;
+            color: limegreen;
+            font-family: monospace;
+        }
+
+        /* Matrix Rain Canvas */
+        #matrixCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            background: black;
+        }
+
+        /* Heading */
+        h1 {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 3em;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+            z-index: 2;
+        }
+
+        /* Donut */
+        pre {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            line-height: 12px;
+            z-index: 3;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrixCanvas"></canvas>
+    <h1>WELCOME TO GURK'S WEBSITE, GOD IM SO BORED</h1>
+    <pre id="donut"></pre>
+
+    <script>
+        // ✅ Matrix Rain Effect
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0f0';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = letters.charAt(Math.floor(Math.random() * letters.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 33);
+
+        // ✅ Spinning ASCII Donut
+        const donut = document.getElementById("donut");
+        let A = 0, B = 0;
+
+        setInterval(() => {
+            let b = [];
+            let z = [];
+            const width = 176, height = 44;
+            for (let k = 0; k < width * height; k++) {
+                b[k] = k % width === width - 1 ? "\n" : " ";
+                z[k] = 0;
+            }
+            for (let j = 0; j < 6.28; j += 0.07) {
+                for (let i = 0; i < 6.28; i += 0.02) {
+                    const c = Math.sin(i),
+                          d = Math.cos(j),
+                          e = Math.sin(A),
+                          f = Math.sin(j),
+                          g = Math.cos(A),
+                          h = d + 2,
+                          D = 1 / (c * h * e + f * g + 5),
+                          l = Math.cos(i),
+                          m = Math.cos(B),
+                          n = Math.sin(B),
+                          t = c * h * g - f * e;
+                    const x = 0 | (width / 2 + 30 * D * (l * h * m - t * n)),
+                          y = 0 | (height / 2 + 15 * D * (l * h * n + t * m)),
+                          o = x + width * y,
+                          N = 0 | (8 * ((f * e - c * d * g) * m - c * d * e - f * g - l * d * n));
+                    if (height > y && y > 0 && x > 0 && width > x && D > z[o]) {
+                        z[o] = D;
+                        b[o] = ".,-~:;=!*#$@"[N > 0 ? N : 0];
+                    }
+                }
+            }
+            donut.textContent = b.join("");
+            A += 0.04;
+            B += 0.08;
+        }, 50);
+    </script>
+</body>
+</html>
