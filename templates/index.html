@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Donut Clicker 3.1</title>
+    <title>Donut Clicker 4.1</title>
     <style>
         html, body {
             margin: 0;
@@ -58,11 +58,11 @@
 
         .counter-container {
             position: absolute;
-            bottom: 180px;
+            bottom: 250px;
             width: 100%;
             text-align: center;
             z-index: 4;
-            font-size: 24px;
+            font-size: 22px;
         }
 
         .shop {
@@ -76,7 +76,7 @@
         .shop button {
             padding: 10px 20px;
             font-size: 18px;
-            margin: 10px;
+            margin: 8px;
             background: #00ff00;
             color: black;
             border: none;
@@ -89,21 +89,109 @@
         .shop button:hover {
             transform: scale(1.1);
         }
+
+        .status {
+            margin-top: 10px;
+            font-size: 18px;
+            color: #00ff00;
+        }
+
+        /* Auto-Clicker Donut Animation */
+        .donut-fall {
+            position: fixed;
+            font-size: 24px;
+            animation: fall 3s linear forwards;
+            z-index: 10;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Sound Control */
+        .sound-control {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            z-index: 6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sound-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #00ff00;
+            cursor: pointer;
+        }
+
+        .volume-slider {
+            width: 100px;
+            display: none;
+        }
+
+        .sound-control:hover .volume-slider {
+            display: block;
+        }
+
+        /* Leaderboard */
+        .leaderboard {
+            position: absolute;
+            top: 100px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border: 1px solid #00ff00;
+            border-radius: 8px;
+            z-index: 7;
+            width: 200px;
+            color: #00ff00;
+        }
+
+        .leaderboard h3 {
+            margin: 0;
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .leaderboard p {
+            text-align: center;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
     <canvas id="matrixCanvas"></canvas>
-    <h1>🍩 DONUT CLICKER 3.1 🍩</h1>
+    <h1>🍩 DONUT CLICKER 4.1 🍩</h1>
     <pre id="donut" title="Click the donut!"></pre>
 
+    <div class="sound-control">
+        <button class="sound-btn" id="soundToggle">🔊</button>
+        <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.01" value="0.3">
+    </div>
+
+    <div class="leaderboard">
+        <h3>Leaderboard</h3>
+        <p>Coming Soon!</p>
+    </div>
+
     <div class="counter-container">
-        Score: <span id="counter">0</span>
+        <div>Score: <span id="counter">0</span></div>
+        <div class="status">
+            Auto-Clickers: <span id="autoCount">0</span> | Click Power: <span id="clickPower">1</span>
+        </div>
     </div>
 
     <div class="shop">
         <button id="speedUpgrade">Speed Upgrade (Cost: <span id="speedCost">50</span>)</button>
-        <button id="colorUpgrade">Color Upgrade (Cost: <span id="colorCost">100</span>)</button>
-        <button id="bgUpgrade">Background Upgrade (Cost: <span id="bgCost">200</span>)</button>
+        <button id="autoClicker">Buy Auto-Clicker (Cost: <span id="autoCost">100</span>)</button>
+        <button id="clickUpgrade">Click Power Upgrade (Cost: <span id="clickCost">150</span>)</button>
+        <button id="colorUpgrade">Color Upgrade (Cost: <span id="colorCost">200</span>)</button>
+        <button id="bgUpgrade">Background Upgrade (Cost: <span id="bgCost">300</span>)</button>
     </div>
 
     <script>
@@ -148,24 +236,54 @@
             if (bgMusic.paused) bgMusic.play();
         }, { once: true });
 
+        let soundEnabled = true;
+
+        // ✅ Sound toggle
+        document.getElementById('soundToggle').addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            document.getElementById('soundToggle').textContent = soundEnabled ? '🔊' : '🔇';
+            if (!soundEnabled) {
+                bgMusic.pause();
+            } else {
+                bgMusic.play();
+            }
+        });
+
+        // ✅ Volume control
+        document.getElementById('volumeSlider').addEventListener('input', (e) => {
+            bgMusic.volume = e.target.value;
+        });
+
         // ✅ Game Variables
         const donut = document.getElementById("donut");
         const counterEl = document.getElementById("counter");
         const speedCostEl = document.getElementById("speedCost");
+        const autoCostEl = document.getElementById("autoCost");
+        const clickCostEl = document.getElementById("clickCost");
         const colorCostEl = document.getElementById("colorCost");
         const bgCostEl = document.getElementById("bgCost");
+        const autoCountEl = document.getElementById("autoCount");
+        const clickPowerEl = document.getElementById("clickPower");
 
         let count = parseInt(localStorage.getItem('score')) || 0;
         let speed = parseInt(localStorage.getItem('speed')) || 50;
         let donutColor = localStorage.getItem('donutColor') || '#00ff00';
         let speedCost = parseInt(localStorage.getItem('speedCost')) || 50;
-        let colorCost = parseInt(localStorage.getItem('colorCost')) || 100;
-        let bgCost = parseInt(localStorage.getItem('bgCost')) || 200;
+        let autoClickers = parseInt(localStorage.getItem('autoClickers')) || 0;
+        let clickPower = parseInt(localStorage.getItem('clickPower')) || 1;
+        let autoCost = parseInt(localStorage.getItem('autoCost')) || 100;
+        let clickCost = parseInt(localStorage.getItem('clickCost')) || 150;
+        let colorCost = parseInt(localStorage.getItem('colorCost')) || 200;
+        let bgCost = parseInt(localStorage.getItem('bgCost')) || 300;
 
         counterEl.textContent = count;
         speedCostEl.textContent = speedCost;
+        autoCostEl.textContent = autoCost;
+        clickCostEl.textContent = clickCost;
         colorCostEl.textContent = colorCost;
         bgCostEl.textContent = bgCost;
+        autoCountEl.textContent = autoClickers;
+        clickPowerEl.textContent = clickPower;
 
         // ✅ Donut Rotation
         let A = 0, B = 0;
@@ -210,14 +328,39 @@
 
         // ✅ Click Logic
         donut.addEventListener("click", () => {
-            count++;
+            count += clickPower;
             counterEl.textContent = count;
             localStorage.setItem('score', count);
-            clickSound.currentTime = 0;
-            clickSound.play();
+            if (soundEnabled) {
+                clickSound.currentTime = 0;
+                clickSound.play();
+            }
         });
 
-        // ✅ Upgrade Logic
+        // ✅ Auto-clicker Interval
+        setInterval(() => {
+            if (autoClickers > 0) {
+                count += autoClickers;
+                counterEl.textContent = count;
+                localStorage.setItem('score', count);
+
+                // Visual donuts falling
+                for (let i = 0; i < autoClickers; i++) {
+                    createFallingDonut();
+                }
+            }
+        }, 1000);
+
+        function createFallingDonut() {
+            const donutEl = document.createElement('div');
+            donutEl.textContent = "🍩";
+            donutEl.classList.add('donut-fall');
+            donutEl.style.left = Math.random() * window.innerWidth + 'px';
+            document.body.appendChild(donutEl);
+            setTimeout(() => donutEl.remove(), 3000);
+        }
+
+        // ✅ Upgrade Buttons
         document.getElementById("speedUpgrade").addEventListener("click", () => {
             if (count >= speedCost) {
                 count -= speedCost;
@@ -225,10 +368,28 @@
                 speed = Math.max(10, speed - 10);
                 clearInterval(rotationInterval);
                 rotationInterval = setInterval(rotateDonut, speed);
-                upgradeSound.play();
+                if (soundEnabled) upgradeSound.play();
                 updateDisplay();
-            } else {
-                alert("Not enough points!");
+            }
+        });
+
+        document.getElementById("autoClicker").addEventListener("click", () => {
+            if (count >= autoCost) {
+                count -= autoCost;
+                autoClickers++;
+                autoCost = Math.floor(autoCost * 1.8);
+                if (soundEnabled) upgradeSound.play();
+                updateDisplay();
+            }
+        });
+
+        document.getElementById("clickUpgrade").addEventListener("click", () => {
+            if (count >= clickCost) {
+                count -= clickCost;
+                clickPower++;
+                clickCost = Math.floor(clickCost * 2);
+                if (soundEnabled) upgradeSound.play();
+                updateDisplay();
             }
         });
 
@@ -237,10 +398,8 @@
                 count -= colorCost;
                 colorCost = Math.floor(colorCost * 1.8);
                 donutColor = donutColor === '#00ff00' ? '#ff00ff' : '#00ffff';
-                upgradeSound.play();
+                if (soundEnabled) upgradeSound.play();
                 updateDisplay();
-            } else {
-                alert("Not enough points!");
             }
         });
 
@@ -249,23 +408,29 @@
                 count -= bgCost;
                 bgCost = Math.floor(bgCost * 1.8);
                 matrixColor = matrixColor === '#0f0' ? '#ff0000' : '#00ffff';
-                upgradeSound.play();
+                if (soundEnabled) upgradeSound.play();
                 updateDisplay();
-            } else {
-                alert("Not enough points!");
             }
         });
 
         function updateDisplay() {
             counterEl.textContent = count;
             speedCostEl.textContent = speedCost;
+            autoCostEl.textContent = autoCost;
+            clickCostEl.textContent = clickCost;
             colorCostEl.textContent = colorCost;
             bgCostEl.textContent = bgCost;
+            autoCountEl.textContent = autoClickers;
+            clickPowerEl.textContent = clickPower;
 
             localStorage.setItem('score', count);
             localStorage.setItem('speed', speed);
             localStorage.setItem('donutColor', donutColor);
             localStorage.setItem('speedCost', speedCost);
+            localStorage.setItem('autoClickers', autoClickers);
+            localStorage.setItem('clickPower', clickPower);
+            localStorage.setItem('autoCost', autoCost);
+            localStorage.setItem('clickCost', clickCost);
             localStorage.setItem('colorCost', colorCost);
             localStorage.setItem('bgCost', bgCost);
         }
