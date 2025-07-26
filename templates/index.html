@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Donut Clicker 2.0</title>
+    <title>Donut Clicker 3.1</title>
     <style>
         html, body {
             margin: 0;
@@ -13,7 +13,6 @@
             font-family: monospace;
         }
 
-        /* Matrix Background */
         #matrixCanvas {
             position: fixed;
             top: 0;
@@ -23,7 +22,6 @@
             z-index: 1;
         }
 
-        /* Title */
         h1 {
             position: absolute;
             top: 20px;
@@ -45,7 +43,6 @@
             }
         }
 
-        /* Donut */
         pre {
             position: absolute;
             top: 50%;
@@ -59,17 +56,15 @@
             color: #00ff00;
         }
 
-        /* Counter */
         .counter-container {
             position: absolute;
-            bottom: 130px;
+            bottom: 180px;
             width: 100%;
             text-align: center;
             z-index: 4;
             font-size: 24px;
         }
 
-        /* Upgrades Panel */
         .shop {
             position: absolute;
             bottom: 20px;
@@ -98,7 +93,7 @@
 </head>
 <body>
     <canvas id="matrixCanvas"></canvas>
-    <h1>🍩 DONUT CLICKER 2.0 🍩</h1>
+    <h1>🍩 DONUT CLICKER 3.1 🍩</h1>
     <pre id="donut" title="Click the donut!"></pre>
 
     <div class="counter-container">
@@ -106,9 +101,9 @@
     </div>
 
     <div class="shop">
-        <button id="speedUpgrade">Upgrade Speed (Cost: 50)</button>
-        <button id="colorUpgrade">Upgrade Color (Cost: 100)</button>
-        <button id="bgUpgrade">Upgrade Background (Cost: 200)</button>
+        <button id="speedUpgrade">Speed Upgrade (Cost: <span id="speedCost">50</span>)</button>
+        <button id="colorUpgrade">Color Upgrade (Cost: <span id="colorCost">100</span>)</button>
+        <button id="bgUpgrade">Background Upgrade (Cost: <span id="bgCost">200</span>)</button>
     </div>
 
     <script>
@@ -142,12 +137,41 @@
         }
         setInterval(drawMatrix, 33);
 
-        // ✅ Spinning Donut
-        const donut = document.getElementById("donut");
-        let A = 0, B = 0, speed = 50;
-        let donutColor = '#00ff00';
+        // ✅ Sounds
+        const clickSound = new Audio('/static/sounds/click.mp3');
+        const upgradeSound = new Audio('/static/sounds/upgrade.mp3');
+        const bgMusic = new Audio('/static/sounds/music.mp3');
+        bgMusic.loop = true;
+        bgMusic.volume = 0.3;
 
-        setInterval(() => {
+        document.body.addEventListener('click', () => {
+            if (bgMusic.paused) bgMusic.play();
+        }, { once: true });
+
+        // ✅ Game Variables
+        const donut = document.getElementById("donut");
+        const counterEl = document.getElementById("counter");
+        const speedCostEl = document.getElementById("speedCost");
+        const colorCostEl = document.getElementById("colorCost");
+        const bgCostEl = document.getElementById("bgCost");
+
+        let count = parseInt(localStorage.getItem('score')) || 0;
+        let speed = parseInt(localStorage.getItem('speed')) || 50;
+        let donutColor = localStorage.getItem('donutColor') || '#00ff00';
+        let speedCost = parseInt(localStorage.getItem('speedCost')) || 50;
+        let colorCost = parseInt(localStorage.getItem('colorCost')) || 100;
+        let bgCost = parseInt(localStorage.getItem('bgCost')) || 200;
+
+        counterEl.textContent = count;
+        speedCostEl.textContent = speedCost;
+        colorCostEl.textContent = colorCost;
+        bgCostEl.textContent = bgCost;
+
+        // ✅ Donut Rotation
+        let A = 0, B = 0;
+        let rotationInterval = setInterval(rotateDonut, speed);
+
+        function rotateDonut() {
             let b = [];
             let z = [];
             const width = 176, height = 44;
@@ -182,60 +206,69 @@
             donut.textContent = b.join("");
             A += 0.04;
             B += 0.08;
-        }, speed);
+        }
 
-        // ✅ Donut Clicker Logic
-        let count = parseInt(localStorage.getItem('score')) || 0;
-        const counterEl = document.getElementById("counter");
-        counterEl.textContent = count;
-
+        // ✅ Click Logic
         donut.addEventListener("click", () => {
             count++;
             counterEl.textContent = count;
             localStorage.setItem('score', count);
+            clickSound.currentTime = 0;
+            clickSound.play();
         });
 
         // ✅ Upgrade Logic
-        const speedBtn = document.getElementById("speedUpgrade");
-        const colorBtn = document.getElementById("colorUpgrade");
-        const bgBtn = document.getElementById("bgUpgrade");
-
-        speedBtn.addEventListener("click", () => {
-            if (count >= 50) {
-                count -= 50;
-                counterEl.textContent = count;
-                localStorage.setItem('score', count);
+        document.getElementById("speedUpgrade").addEventListener("click", () => {
+            if (count >= speedCost) {
+                count -= speedCost;
+                speedCost = Math.floor(speedCost * 1.8);
                 speed = Math.max(10, speed - 10);
-                clearInterval(); // restart donut rotation with new speed
-                alert("Speed upgraded! Donut spins faster.");
+                clearInterval(rotationInterval);
+                rotationInterval = setInterval(rotateDonut, speed);
+                upgradeSound.play();
+                updateDisplay();
             } else {
                 alert("Not enough points!");
             }
         });
 
-        colorBtn.addEventListener("click", () => {
-            if (count >= 100) {
-                count -= 100;
-                counterEl.textContent = count;
-                localStorage.setItem('score', count);
-                donutColor = '#ff00ff'; // Magenta color
-                alert("Donut color changed!");
+        document.getElementById("colorUpgrade").addEventListener("click", () => {
+            if (count >= colorCost) {
+                count -= colorCost;
+                colorCost = Math.floor(colorCost * 1.8);
+                donutColor = donutColor === '#00ff00' ? '#ff00ff' : '#00ffff';
+                upgradeSound.play();
+                updateDisplay();
             } else {
                 alert("Not enough points!");
             }
         });
 
-        bgBtn.addEventListener("click", () => {
-            if (count >= 200) {
-                count -= 200;
-                counterEl.textContent = count;
-                localStorage.setItem('score', count);
-                matrixColor = '#ff0000'; // Red background text
-                alert("Background changed!");
+        document.getElementById("bgUpgrade").addEventListener("click", () => {
+            if (count >= bgCost) {
+                count -= bgCost;
+                bgCost = Math.floor(bgCost * 1.8);
+                matrixColor = matrixColor === '#0f0' ? '#ff0000' : '#00ffff';
+                upgradeSound.play();
+                updateDisplay();
             } else {
                 alert("Not enough points!");
             }
         });
+
+        function updateDisplay() {
+            counterEl.textContent = count;
+            speedCostEl.textContent = speedCost;
+            colorCostEl.textContent = colorCost;
+            bgCostEl.textContent = bgCost;
+
+            localStorage.setItem('score', count);
+            localStorage.setItem('speed', speed);
+            localStorage.setItem('donutColor', donutColor);
+            localStorage.setItem('speedCost', speedCost);
+            localStorage.setItem('colorCost', colorCost);
+            localStorage.setItem('bgCost', bgCost);
+        }
     </script>
 </body>
 </html>
