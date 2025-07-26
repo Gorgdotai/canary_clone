@@ -3,149 +3,30 @@
 <head>
     <title>Gurk's Doughnut Clicker</title>
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden;
-            background: black;
-            color: limegreen;
-            font-family: monospace;
-        }
-
-        #matrixCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        h1 {
-            position: absolute;
-            top: 20px;
-            width: 100%;
-            text-align: center;
-            font-size: 3em;
-            color: #00ff00;
-            text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
-            animation: neonPulse 2s infinite;
-            z-index: 2;
-        }
-
-        @keyframes neonPulse {
-            0%, 100% { text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00; }
-            50% { text-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00; }
-        }
-
-        pre {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 14px;
-            line-height: 12px;
-            z-index: 3;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .counter-container {
-            position: absolute;
-            bottom: 270px;
-            width: 100%;
-            text-align: center;
-            z-index: 4;
-            font-size: 22px;
-        }
-
-        .shop {
-            position: absolute;
-            bottom: 20px;
-            width: 100%;
-            text-align: center;
-            z-index: 5;
-        }
-
-        .shop button {
-            padding: 10px 20px;
-            font-size: 18px;
-            margin: 8px;
-            background: #00ff00;
-            color: black;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.2s;
-        }
-
-        .shop button:hover { transform: scale(1.1); }
-
-        .status {
-            margin-top: 10px;
-            font-size: 18px;
-            color: #00ff00;
-        }
-
-        .effect {
-            color: gold;
-            font-weight: bold;
-            margin-top: 10px;
-            animation: glow 1s infinite alternate;
-        }
-
-        @keyframes glow {
-            0% { text-shadow: 0 0 5px gold; }
-            100% { text-shadow: 0 0 20px gold; }
-        }
-
-        /* Leaderboard */
-        .leaderboard {
-            position: absolute;
-            top: 100px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 10px;
-            border: 1px solid #00ff00;
-            border-radius: 8px;
-            z-index: 7;
-            width: 220px;
-            color: #00ff00;
-        }
-
-        .leaderboard h3 { margin: 0; font-size: 18px; text-align: center; margin-bottom: 10px; }
-        .leaderboard input { width: 100%; margin-top: 8px; padding: 5px; }
-        .leaderboard button {
-            margin-top: 6px; width: 100%; padding: 8px; background: #00ff00; color: black;
-            font-weight: bold; border: none; cursor: pointer;
-        }
-
-        /* Prestige Background Animation */
-        body.prestige-bg {
-            background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00);
-            background-size: 600% 600%;
-            animation: gradientShift 8s ease infinite;
-        }
-
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .donut-fall {
-            position: fixed;
-            font-size: 24px;
-            animation: fall 3s linear forwards;
-            z-index: 10;
-        }
-
-        @keyframes fall {
-            0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-        }
+        html, body { margin:0; padding:0; height:100%; overflow:hidden; background:black; color:limegreen; font-family:monospace; }
+        #matrixCanvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:1; }
+        h1 { position:absolute; top:20px; width:100%; text-align:center; font-size:3em; color:#00ff00; text-shadow:0 0 10px #00ff00,0 0 20px #00ff00; animation:neonPulse 2s infinite; z-index:2; }
+        @keyframes neonPulse { 0%,100%{text-shadow:0 0 10px #00ff00,0 0 20px #00ff00;} 50%{text-shadow:0 0 20px #00ff00,0 0 40px #00ff00;} }
+        pre { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:14px; line-height:12px; z-index:3; cursor:pointer; user-select:none; }
+        .counter-container { position:absolute; bottom:270px; width:100%; text-align:center; z-index:4; font-size:22px; }
+        .shop { position:absolute; bottom:20px; width:100%; text-align:center; z-index:5; }
+        .shop button { padding:10px 20px; font-size:18px; margin:8px; background:#00ff00; color:black; border:none; border-radius:8px; cursor:pointer; font-weight:bold; transition:transform 0.2s; }
+        .shop button:hover { transform:scale(1.1); }
+        .status { margin-top:10px; font-size:18px; color:#00ff00; }
+        .effect { color:gold; font-weight:bold; margin-top:10px; animation:glow 1s infinite alternate; }
+        @keyframes glow { 0%{text-shadow:0 0 5px gold;} 100%{text-shadow:0 0 20px gold;} }
+        .leaderboard { position:absolute; top:100px; right:20px; background:rgba(0,0,0,0.7); padding:10px; border:1px solid #00ff00; border-radius:8px; z-index:7; width:220px; color:#00ff00; }
+        .leaderboard h3 { margin:0; font-size:18px; text-align:center; margin-bottom:10px; }
+        .leaderboard input { width:100%; margin-top:8px; padding:5px; }
+        .leaderboard button { margin-top:6px; width:100%; padding:8px; background:#00ff00; color:black; font-weight:bold; border:none; cursor:pointer; }
+        body.prestige-bg { background:linear-gradient(45deg,#ff00ff,#00ffff,#ffff00); background-size:600% 600%; animation:gradientShift 8s ease infinite; }
+        @keyframes gradientShift { 0%{background-position:0% 50%;} 50%{background-position:100% 50%;} 100%{background-position:0% 50%;} }
+        .donut-fall { position:fixed; font-size:24px; animation:fall 3s linear forwards; z-index:10; }
+        @keyframes fall { 0%{transform:translateY(-50px) rotate(0deg);opacity:1;} 100%{transform:translateY(100vh) rotate(720deg);opacity:0;} }
+        .sound-control { position:absolute; top:10px; right:20px; z-index:6; display:flex; align-items:center; gap:10px; }
+        .sound-btn { background:none; border:none; font-size:24px; color:#00ff00; cursor:pointer; }
+        .volume-slider { width:100px; display:none; }
+        .sound-control:hover .volume-slider { display:block; }
     </style>
 </head>
 <body>
@@ -153,21 +34,28 @@
     <h1>🍩 Gurk's Doughnut Clicker 🍩</h1>
     <pre id="donut" title="Click the donut!"></pre>
 
+    <!-- Sound Controls -->
+    <div class="sound-control">
+        <button class="sound-btn" id="soundToggle">🔊</button>
+        <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.01" value="0.3">
+    </div>
+
+    <!-- Leaderboard -->
     <div class="leaderboard">
         <h3>Leaderboard</h3>
-        <ul id="leaderboardList" style="list-style:none; padding:0; margin:0;"></ul>
+        <ul id="leaderboardList" style="list-style:none;padding:0;margin:0;"></ul>
         <input type="text" id="username" placeholder="Your Name">
         <button id="submitScore">Submit Score</button>
     </div>
 
+    <!-- Counter & Status -->
     <div class="counter-container">
         <div>Score: <span id="counter">0</span></div>
-        <div class="status">
-            Auto-Clickers: <span id="autoCount">0</span> | Click Power: <span id="clickPower">1</span>
-        </div>
+        <div class="status">Auto-Clickers: <span id="autoCount">0</span> | Click Power: <span id="clickPower">1</span></div>
         <div id="effectStatus" class="effect" style="display:none;">Golden Mode Active!</div>
     </div>
 
+    <!-- Shop -->
     <div class="shop">
         <button id="speedUpgrade">Speed Upgrade (Cost: <span id="speedCost">50</span>)</button>
         <button id="autoClicker">Auto-Clicker (Cost: <span id="autoCost">100</span>)</button>
@@ -179,6 +67,28 @@
     </div>
 
     <script>
+        // ==== SOUND SETUP ====
+        const clickSound = new Audio('/static/sounds/click.mp3');
+        const upgradeSound = new Audio('/static/sounds/upgrade.mp3');
+        const goldenSound = new Audio('/static/sounds/golden.mp3');
+        const prestigeSound = new Audio('/static/sounds/prestige.mp3');
+        const bgMusic = new Audio('/static/sounds/music.mp3');
+        bgMusic.loop = true; bgMusic.volume = 0.3;
+        let soundEnabled = true;
+
+        document.body.addEventListener('click', () => { if (bgMusic.paused) bgMusic.play(); }, { once: true });
+        document.getElementById('soundToggle').onclick = () => {
+            soundEnabled = !soundEnabled;
+            document.getElementById('soundToggle').textContent = soundEnabled ? '🔊' : '🔇';
+            if (!soundEnabled) bgMusic.pause(); else bgMusic.play();
+        };
+        document.getElementById('volumeSlider').oninput = e => bgMusic.volume = e.target.value;
+
+        function playSound(sound) {
+            if (soundEnabled) { sound.currentTime = 0; sound.play(); }
+        }
+
+        // ==== GAME VARIABLES ====
         const donut = document.getElementById("donut");
         const counterEl = document.getElementById("counter");
         const autoCountEl = document.getElementById("autoCount");
@@ -246,36 +156,47 @@
             donut.textContent = b.join(""); A += 0.04; B += 0.08;
         }
 
-        donut.addEventListener("click", () => {
+        // Click
+        donut.onclick = () => {
             count += clickPower * prestigeMultiplier * (goldenActive ? 10 : 1);
             updateUI(); saveState();
-        });
+            playSound(clickSound);
+        };
 
-        // Auto-clicker interval
+        // Auto-clickers
         setInterval(() => {
             if (autoClickers > 0) {
                 count += autoClickers * prestigeMultiplier;
                 updateUI(); saveState();
+                createFallingDonut();
             }
         }, 1000);
 
+        function createFallingDonut() {
+            const donutEl = document.createElement('div');
+            donutEl.textContent = "🍩";
+            donutEl.classList.add('donut-fall');
+            donutEl.style.left = Math.random() * window.innerWidth + 'px';
+            document.body.appendChild(donutEl);
+            setTimeout(() => donutEl.remove(), 3000);
+        }
+
         // Upgrades
-        document.getElementById("speedUpgrade").onclick = () => { if (count >= speedCost) { count -= speedCost; speedCost *= 1.8; speed = Math.max(10, speed - 10); clearInterval(rotationInterval); rotationInterval = setInterval(rotateDonut, speed); updateUI(); saveState(); } };
-        document.getElementById("autoClicker").onclick = () => { if (count >= autoCost) { count -= autoCost; autoClickers++; autoCost *= 1.8; updateUI(); saveState(); } };
-        document.getElementById("clickUpgrade").onclick = () => { if (count >= clickCost) { count -= clickCost; clickPower++; clickCost *= 2; updateUI(); saveState(); } };
-        document.getElementById("colorUpgrade").onclick = () => { if (count >= colorCost) { count -= colorCost; colorCost *= 1.8; donutColor = donutColor === '#00ff00' ? '#ff00ff' : '#00ffff'; updateUI(); saveState(); } };
-        document.getElementById("bgUpgrade").onclick = () => { if (count >= bgCost) { count -= bgCost; bgCost *= 1.8; matrixColor = matrixColor === '#0f0' ? '#ff0000' : '#00ffff'; updateUI(); saveState(); } };
+        document.getElementById("speedUpgrade").onclick = () => { if (count >= speedCost) { count -= speedCost; speedCost *= 1.8; speed = Math.max(10, speed - 10); clearInterval(rotationInterval); rotationInterval = setInterval(rotateDonut, speed); updateUI(); saveState(); playSound(upgradeSound);} };
+        document.getElementById("autoClicker").onclick = () => { if (count >= autoCost) { count -= autoCost; autoClickers++; autoCost *= 1.8; updateUI(); saveState(); playSound(upgradeSound);} };
+        document.getElementById("clickUpgrade").onclick = () => { if (count >= clickCost) { count -= clickCost; clickPower++; clickCost *= 2; updateUI(); saveState(); playSound(upgradeSound);} };
+        document.getElementById("colorUpgrade").onclick = () => { if (count >= colorCost) { count -= colorCost; colorCost *= 1.8; donutColor = donutColor === '#00ff00' ? '#ff00ff' : '#00ffff'; updateUI(); saveState(); playSound(upgradeSound);} };
+        document.getElementById("bgUpgrade").onclick = () => { if (count >= bgCost) { count -= bgCost; bgCost *= 1.8; matrixColor = matrixColor === '#0f0' ? '#ff0000' : '#00ffff'; updateUI(); saveState(); playSound(upgradeSound);} };
 
         document.getElementById("goldenDonut").onclick = () => {
             if (count >= goldCost && !goldenActive) {
-                count -= goldCost;
-                goldCost *= 2;
+                count -= goldCost; goldCost *= 2;
                 goldenActive = true;
                 effectStatus.style.display = 'block';
                 document.getElementById("goldenDonut").disabled = true;
+                playSound(goldenSound);
                 setTimeout(() => {
-                    goldenActive = false;
-                    effectStatus.style.display = 'none';
+                    goldenActive = false; effectStatus.style.display = 'none';
                     document.getElementById("goldenDonut").disabled = false;
                 }, 30000);
                 updateUI(); saveState();
@@ -284,16 +205,16 @@
 
         document.getElementById("prestige").onclick = () => {
             if (confirm("Prestige? Reset for permanent x2 multiplier!")) {
-                prestigeMultiplier *= 2;
-                count = 0; autoClickers = 0; clickPower = 1;
+                prestigeMultiplier *= 2; count = 0; autoClickers = 0; clickPower = 1;
                 speed = 50; speedCost = 50; autoCost = 100; clickCost = 150;
                 colorCost = 200; bgCost = 300; goldCost = 500;
                 document.body.classList.add('prestige-bg');
+                playSound(prestigeSound);
                 saveState(); updateUI();
             }
         };
 
-        // Matrix animation
+        // Matrix Background
         const canvas = document.getElementById('matrixCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
