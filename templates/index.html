@@ -32,8 +32,18 @@
             text-align: center;
             font-size: 3em;
             color: #00ff00;
-            text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+            text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00;
+            animation: neonPulse 2s infinite;
             z-index: 2;
+        }
+
+        @keyframes neonPulse {
+            0%, 100% {
+                text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00;
+            }
+            50% {
+                text-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00, 0 0 60px #00ff00;
+            }
         }
 
         /* Donut */
@@ -46,12 +56,48 @@
             line-height: 12px;
             z-index: 3;
         }
+
+        /* Counter and Button */
+        .counter-container {
+            position: absolute;
+            bottom: 80px;
+            width: 100%;
+            text-align: center;
+            z-index: 4;
+        }
+
+        .counter-container h2 {
+            color: #00ff00;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        #incrementBtn {
+            padding: 12px 24px;
+            font-size: 18px;
+            background: #00ff00;
+            color: black;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        #incrementBtn:hover {
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
     <canvas id="matrixCanvas"></canvas>
-    <h1>WELCOME TO GURK'S WEBSITE, wohoo website</h1>
+    <h1>WELCOME TO CANARY CLONE</h1>
     <pre id="donut"></pre>
+
+    <div class="counter-container">
+        <h2>Counter: <span id="counter">0</span></h2>
+        <button id="incrementBtn">Click Me!</button>
+    </div>
 
     <script>
         // ✅ Matrix Rain Effect
@@ -122,6 +168,13 @@
             A += 0.04;
             B += 0.08;
         }, 50);
+
+        // ✅ Button Counter Logic
+        let count = 0;
+        document.getElementById("incrementBtn").addEventListener("click", () => {
+            count++;
+            document.getElementById("counter").textContent = count;
+        });
     </script>
 </body>
 </html>
